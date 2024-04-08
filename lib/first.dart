@@ -6,20 +6,19 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 
-
 import 'package:flutter/material.dart';
 
 import 'package:another_audio_recorder/another_audio_recorder.dart';
 import 'package:path_provider/path_provider.dart';
 
-
 class RecorderExample extends StatefulWidget {
   final LocalFileSystem localFileSystem;
-  
-  const RecorderExample({super.key, localFileSystem}) : localFileSystem = localFileSystem ?? const LocalFileSystem();
+
+  const RecorderExample({super.key, localFileSystem})
+      : localFileSystem = localFileSystem ?? const LocalFileSystem();
 
   @override
-  State<StatefulWidget> createState() =>  _RecorderExampleState();
+  State<StatefulWidget> createState() => _RecorderExampleState();
 }
 
 class _RecorderExampleState extends State<RecorderExample> {
@@ -36,74 +35,81 @@ class _RecorderExampleState extends State<RecorderExample> {
 
   @override
   Widget build(BuildContext context) {
-    return  Center(
-      child:  Padding(
-        padding:  const EdgeInsets.all(8.0),
-        child:  Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: <Widget>[
-           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    switch (_currentStatus) {
-                      case RecordingStatus.Initialized:
-                        {
-                          _start();
-                          break;
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        switch (_currentStatus) {
+                          case RecordingStatus.Initialized:
+                            {
+                              _start();
+                              break;
+                            }
+                          case RecordingStatus.Recording:
+                            {
+                              _pause();
+                              break;
+                            }
+                          case RecordingStatus.Paused:
+                            {
+                              _resume();
+                              break;
+                            }
+                          case RecordingStatus.Stopped:
+                            {
+                              _init();
+                              break;
+                            }
+                          default:
+                            break;
                         }
-                      case RecordingStatus.Recording:
-                        {
-                          _pause();
-                          break;
-                        }
-                      case RecordingStatus.Paused:
-                        {
-                          _resume();
-                          break;
-                        }
-                      case RecordingStatus.Stopped:
-                        {
-                          _init();
-                          break;
-                        }
-                      default:
-                        break;
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.lightBlue,
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.lightBlue,
+                      ),
+                      child: _buildText(_currentStatus),
+                    ),
                   ),
-                  child: _buildText(_currentStatus),
-                ),
+                  ElevatedButton(
+                    onPressed:
+                        _currentStatus != RecordingStatus.Unset ? _stop : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent.withOpacity(0.5),
+                    ),
+                    child: const Text("Stop",
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: onPlayAudio,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent.withOpacity(0.5),
+                    ),
+                    child: const Text("Play",
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                ],
               ),
-              ElevatedButton(
-                onPressed: _currentStatus != RecordingStatus.Unset ? _stop : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent.withOpacity(0.5),
-                ),
-                child: const Text("Stop", style: TextStyle(color: Colors.white)),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: onPlayAudio,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent.withOpacity(0.5),
-                ),
-                child: const Text("Play", style: TextStyle(color: Colors.white)),
-              ),
-            ],
-          ),
-           Text("Status : $_currentStatus"),
-           Text('Avg Power: ${_current?.metering?.averagePower}'),
-           Text('Peak Power: ${_current?.metering?.peakPower}'),
-           Text("File path of the record: ${_current?.path}"),
-           Text("Format: ${_current?.audioFormat}"),
-           Text("isMeteringEnabled: ${_current?.metering?.isMeteringEnabled}"),
-           Text("Extension : ${_current?.extension}"),
-           Text("Audio recording duration : ${_current?.duration.toString()}")
-        ]),
+              Text("Status : $_currentStatus"),
+              Text('Avg Power: ${_current?.metering?.averagePower}'),
+              Text('Peak Power: ${_current?.metering?.peakPower}'),
+              Text("File path of the record: ${_current?.path}"),
+              Text("Format: ${_current?.audioFormat}"),
+              Text(
+                  "isMeteringEnabled: ${_current?.metering?.isMeteringEnabled}"),
+              Text("Extension : ${_current?.extension}"),
+              Text(
+                  "Audio recording duration : ${_current?.duration.toString()}")
+            ]),
       ),
     );
   }
@@ -121,12 +127,15 @@ class _RecorderExampleState extends State<RecorderExample> {
         }
 
         // can add extension like ".mp4" ".wav" ".m4a" ".aac"
-        customPath = appDocDirectory.path + customPath + DateTime.now().millisecondsSinceEpoch.toString();
+        customPath = appDocDirectory.path +
+            customPath +
+            DateTime.now().millisecondsSinceEpoch.toString();
 
         // .wav <---> AudioFormat.WAV
         // .mp4 .m4a .aac <---> AudioFormat.AAC
         // AudioFormat is optional, if given value, will overwrite path extension when there is conflicts.
-        _recorder = AnotherAudioRecorder(customPath, audioFormat: AudioFormat.WAV);
+        _recorder =
+            AnotherAudioRecorder(customPath, audioFormat: AudioFormat.WAV);
 
         await _recorder?.initialized;
         // after initialization
@@ -155,7 +164,7 @@ class _RecorderExampleState extends State<RecorderExample> {
       });
 
       const tick = Duration(milliseconds: 50);
-       Timer.periodic(tick, (Timer t) async {
+      Timer.periodic(tick, (Timer t) async {
         if (_currentStatus == RecordingStatus.Stopped) {
           t.cancel();
         }
@@ -183,10 +192,11 @@ class _RecorderExampleState extends State<RecorderExample> {
   }
 
   _stop() async {
-    var result = await _recorder?.stop();
+    final result = await _recorder?.stop();
     print("Stop recording: ${result?.path}");
     print("Stop recording: ${result?.duration}");
-    File file = widget.localFileSystem.file(result?.path);
+
+    final file = widget.localFileSystem.file(result?.path);
     print("File length: ${await file.length()}");
     setState(() {
       _current = result;
